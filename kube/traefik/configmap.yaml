@@ -28,11 +28,13 @@ data:
 
 
     [acme]
+    dnsProvider = "cloudflare"
     email = "jason.gwartz@gmail.com"
     storage = "/nfs/traefik/acme.json"
     entryPoint = "https"
     OnHostRule = true
-    
+    acmeLogging= true
+
     # [metrics]
     #   # To enable Traefik to export internal metrics to Prometheus
     #   [metrics.prometheus]
