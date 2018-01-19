@@ -1,0 +1,54 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: pihole
+    labels:
+        app: pihole
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: pihole
+    template:
+        metadata:
+            labels:
+                app: pihole
+                name: pihole
+        spec:
+            containers:
+            - image: diginc/pi-hole-multiarch:debian_armhf
+              imagePullPolicy: Always
+              name: pihole
+              env:
+              - ServerIP:
+            volumeMounts:
+        # name must match the volume name below
+            - name: traefik-nfs
+              mountPath: "/nfs/pihole"
+        volumes:
+        - name: pihole-nfs
+          persistentVolumeClaim:
+            claimName: pihole-nfs
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: pihole
+spec:
+    selector:
+        app: pihole
+    ports:
+        - port: 8000
+          targetPort: 80
+        - port: 53
+          targetPort: 53
+          protocol: TCP
+        - port: 53
+          targetPort: 53
+          protocol: UDP
+    externalIPs:
+    - 10.0.2.30
+    - 10.0.2.31
+    - 10.0.2.32
+
