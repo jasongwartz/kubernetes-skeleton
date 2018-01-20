@@ -15,6 +15,7 @@ spec:
       labels:
         app: prometheus
     spec:
+      serviceAccountName: prometheus
       containers:
       - name: prometheus
         image: jasongwartz/prometheus-armhf:2.1.0
