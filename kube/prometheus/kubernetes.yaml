@@ -1,0 +1,59 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus
+  labels:
+    app: prometheus
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+    spec:
+      containers:
+      - name: prometheus
+        image: jasongwartz/prometheus-armhf:2.1.0
+        ports:
+        - containerPort: 9090
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/prometheus
+      volumes:
+      - name: config-volume
+        configMap:
+          name: prometheus
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: prometheus
+spec:
+  selector:
+    app: prometheus
+  ports:
+  - port: 80
+    targetPort: 9090
+    name: prometheus-web
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: prometheus
+  annotations:
+    kubernetes.io/ingress.class: "traefik"
+    ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - host: "prometheus.gwartz.me"
+    http:
+      paths:
+      - backend:
+          serviceName: prometheus
+          servicePort: 80
+
+
