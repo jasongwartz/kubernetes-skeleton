@@ -58,6 +58,8 @@ apiVersion: v1
 metadata:
   name: traefik-ingress-service
   namespace: ingress-controller
+  annotations:
+    prometheus.io/scrape: "true"
 spec:
   selector:
     k8s-app: traefik-ingress-lb
@@ -74,4 +76,33 @@ spec:
   # type: NodePort
   externalIPs:
   - "10.0.2.30"
-
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: traefik-web-ui
+  namespace: ingress-controller
+  annotations:
+    prometheus.io/scrape: "true"
+spec:
+  selector:
+    k8s-app: traefik-ingress-lb
+  ports:
+  - port: 80
+    targetPort: 8080
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: traefik-web-ui
+  namespace: ingress-controller
+  annotations:
+    kubernetes.io/ingress.class: traefik
+spec:
+  rules:
+  - host: traefik.gwartz.me
+    http:
+      paths:
+      - backend:
+          serviceName: traefik-web-ui
+          servicePort: 80
