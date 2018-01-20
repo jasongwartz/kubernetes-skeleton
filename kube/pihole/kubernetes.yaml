@@ -20,16 +20,19 @@ spec:
             - image: diginc/pi-hole-multiarch:debian_armhf
               imagePullPolicy: Always
               name: pihole
-              env:
-              - ServerIP:
-            volumeMounts:
+              volumeMounts:
         # name must match the volume name below
-            - name: traefik-nfs
-              mountPath: "/nfs/pihole"
-        volumes:
-        - name: pihole-nfs
-          persistentVolumeClaim:
-            claimName: pihole-nfs
+              - name: pihole-nfs-etc
+                mountPath: "/etc/pihole"
+              - name: pihole-nfs-dnsmasq
+                mountPath: "/etc/dnsmasq.d"
+            volumes:
+            - name: pihole-nfs-etc
+              persistentVolumeClaim:
+                claimName: pihole-nfs-etc
+            - name: pihole-nfs-dnsmasq
+              persistentVolumeClaim:
+                claimName: pihole-nfs-dnsmasq
 ---
 apiVersion: v1
 kind: Service
@@ -39,14 +42,17 @@ spec:
     selector:
         app: pihole
     ports:
-        - port: 8000
-          targetPort: 80
-        - port: 53
-          targetPort: 53
-          protocol: TCP
-        - port: 53
-          targetPort: 53
-          protocol: UDP
+    - port: 8000
+      targetPort: 80
+      name: pihole-admin
+    - port: 53
+      targetPort: 53
+      protocol: TCP
+      name: dns-tcp
+    - port: 53
+      targetPort: 53
+      protocol: UDP
+      name: dns-udp
     externalIPs:
     - 10.0.2.30
     - 10.0.2.31

@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: pihole-nfs
+  name: pihole-nfs-etc
 spec:
   capacity:
     storage: 100Mi
@@ -9,12 +9,37 @@ spec:
     - ReadWriteMany
   nfs:
     server: 10.0.1.5
-    path: "/volume1/kubernetes-nfs/pihole"
+    path: "/volume1/kubernetes-nfs/pihole/pihole"
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: pihole-nfs
+  name: pihole-nfs-etc
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: ""
+  resources:
+    requests:
+      storage: 100Mi
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pihole-nfs-dnsmasq
+spec:
+  capacity:
+    storage: 100Mi
+  accessModes:
+    - ReadWriteMany
+  nfs:
+    server: 10.0.1.5
+    path: "/volume1/kubernetes-nfs/pihole/dnsmasq.d"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pihole-nfs-dnsmasq
 spec:
   accessModes:
     - ReadWriteMany
