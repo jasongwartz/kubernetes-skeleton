@@ -12,9 +12,9 @@ data:
       [entryPoints.http]
       address = ":80"
         [entryPoints.http.redirect]
-    #    regex = "^http://jasongwartz.com"
-    #    regex = "^http://(jasongwartz.com|gwartz.me|twoidiots.eu)/(.*)"
-    #    replacement = "https://www.$1/$2"
+        regex = "^http://jasongwartz.com/(.*)"
+        #regex = "^http://(jasongwartz.com|gwartz.me|twoidiots.eu)/(.*)"
+        replacement = "https://www.jasongwartz.com/$1"
         entrypoint = "https"
       [entryPoints.https]
       address = ":443"
@@ -34,13 +34,3 @@ data:
     entryPoint = "https"
     OnHostRule = true
     acmeLogging= true
-
-    # [metrics]
-    #   # To enable Traefik to export internal metrics to Prometheus
-    #   [metrics.prometheus]
-    #   # Name of the related entry point
-    #   #
-    #   # Optional
-    #   # Default: "traefik"
-    #   #
-    #   entryPoint = "traefik"
