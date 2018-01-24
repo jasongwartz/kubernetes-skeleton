@@ -26,7 +26,7 @@ spec:
       serviceAccountName: traefik-ingress-controller
       terminationGracePeriodSeconds: 60
       containers:
-      - image: traefik:alpine
+      - image: traefik:1.5-alpine
         name: traefik-ingress-lb
         env:
         - name: CLOUDFLARE_EMAIL
@@ -59,6 +59,8 @@ metadata:
   name: traefik-ingress-service
   namespace: ingress-controller
 spec:
+  type: NodePort
+  externalTrafficPolicy: Local
   selector:
     k8s-app: traefik-ingress-lb
   ports:
@@ -68,11 +70,10 @@ spec:
     - protocol: TCP
       port: 443
       name: https
-    - protocol: TCP
-      port: 8080
-      name: admin
   externalIPs:
-  - "10.0.2.30"
+  - 10.0.2.30
+  - 10.0.2.31
+  - 10.0.2.32
 ---
 apiVersion: v1
 kind: Service
