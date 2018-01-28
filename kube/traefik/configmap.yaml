@@ -26,6 +26,7 @@ data:
     readOnly = true
       [web.metrics.prometheus]
 
+    [accessLog]
 
     [acme]
     dnsProvider = "cloudflare"
