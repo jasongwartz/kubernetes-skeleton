@@ -16,7 +16,13 @@ spec:
       - name: telegraf
         image: telegraf
         imagePullPolicy: Always
-        # resources:
+        resources:
+          # requests:
+          #   memory: "64Mi"
+          #   cpu: "250m"
+          limits:
+            memory: "50Mi"
+            cpu: "80m"
         env:
         # This pulls HOSTNAME from the node, not the pod.
         - name: HOSTNAME
