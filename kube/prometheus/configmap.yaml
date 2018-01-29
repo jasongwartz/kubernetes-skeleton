@@ -76,57 +76,51 @@ data:
     #   kubernetes_sd_configs:
     #     role: apiserver
 
-    # - job_name: 'kubernetes-cadvisor'
 
-    #   # Default to scraping over https. If required, just disable this or change to
-    #   # `http`.
-    #   scheme: http
 
-    #   # This TLS & bearer token file config is used to connect to the actual scrape
-    #   # endpoints for cluster components. This is separate to discovery auth
-    #   # configuration (`in_cluster` below) because discovery & scraping are two
-    #   # separate concerns in Prometheus.
-    #   #tls_config:
-    #   #  ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
-    #     # If your node certificates are self-signed or use a different CA to the
-    #     # master CA, then disable certificate verification below. Note that
-    #     # certificate verification is an integral part of a secure infrastructure
-    #     # so this should only be disabled in a controlled environment. You can
-    #     # disable certificate verification by uncommenting the line below.
-    #     #
-    #     # insecure_skip_verify: true
-    #   #bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+    # Scrape config for Kubelet cAdvisor.
+    #
+    # This is required for Kubernetes 1.7.3 and later, where cAdvisor metrics
+    # (those whose names begin with 'container_') have been removed from the
+    # Kubelet metrics endpoint.  This job scrapes the cAdvisor endpoint to
+    # retrieve those metrics.
+    #
+    # In Kubernetes 1.7.0-1.7.2, these metrics are only exposed on the cAdvisor
+    # HTTP endpoint; use "replacement: /api/v1/nodes/${1}:4194/proxy/metrics"
+    # in that case (and ensure cAdvisor's HTTP server hasn't been disabled with
+    # the --cadvisor-port=0 Kubelet flag).
+    #
+    # This job is not necessary and should be removed in Kubernetes 1.6 and
+    # earlier versions, or it will cause the metrics to be scraped twice.
+    - job_name: 'kubernetes-cadvisor'
 
-    #   kubernetes_sd_configs:
-    #   # - api_servers:
-    #   #   - https://kubernetes.default.svc
-    #   #   in_cluster: true
-    #     role: node
+      # Default to scraping over https. If required, just disable this or change to
+      # `http`.
+      scheme: https
 
-    #   relabel_configs:
-    #   - action: labelmap
-    #     regex: __meta_kubernetes_node_label_(.+)
-    #   # Use cadvisor 4194 port
-    #   - source_labels: [__address__]
-    #     regex: '(.*):10250'
-    #     replacement: '${1}:4194'
-    #     target_label: __address__
+      # This TLS & bearer token file config is used to connect to the actual scrape
+      # endpoints for cluster components. This is separate to discovery auth
+      # configuration because discovery & scraping are two separate concerns in
+      # Prometheus. The discovery auth config is automatic if Prometheus runs inside
+      # the cluster. Otherwise, more config options have to be provided within the
+      # <kubernetes_sd_config>.
+      tls_config:
+        ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+      bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
 
-    #   # Backward compatibility for Kubernetes 1.3 dashboards
-    #   metric_relabel_configs:
-    #   - source_labels: [io_kubernetes_container_name,container_name]
-    #     action: replace
-    #     regex: (.*);(.*)
-    #     replacement: '${1}${2}'
-    #     target_label: io_kubernetes_container_name
-    #   - source_labels: [kubernetes_pod_name,pod_name]
-    #     action: replace
-    #     regex: (.*);(.*)
-    #     replacement: '${1}${2}'
-    #     target_label: kubernetes_pod_name
-    #   - source_labels: [kubernetes_pod_name]
-    #     action: replace
-    #     target_label: io_kubernetes_pod_name
+      kubernetes_sd_configs:
+      - role: node
+
+      relabel_configs:
+      - action: labelmap
+        regex: __meta_kubernetes_node_label_(.+)
+      - target_label: __address__
+        replacement: kubernetes.default.svc:443
+      - source_labels: [__meta_kubernetes_node_name]
+        regex: (.+)
+        target_label: __metrics_path__
+        replacement: /api/v1/nodes/${1}/proxy/metrics/cadvisor
+
 
     - job_name: 'kubernetes-nodes'
 

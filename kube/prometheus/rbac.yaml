@@ -9,8 +9,9 @@ rules:
   - services
   - endpoints
   - pods
+  - nodes/proxy
   verbs: ["get", "list", "watch"]
-- nonResourceURLs: ["/metrics"]
+- nonResourceURLs: ["/metrics", "/metrics/cadvisor"]
   verbs: ["get"]
 ---
 apiVersion: v1
