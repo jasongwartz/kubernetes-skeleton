@@ -5,6 +5,8 @@ metadata:
   labels:
     app: telegraf
 spec:
+  updateStrategy:
+    type: RollingUpdate
   template:
     metadata:
       labels:
@@ -21,6 +23,10 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: spec.nodeName
+        - name: HOST_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
         - name: "HOST_PROC"
           value: "/rootfs/proc"
         - name: "HOST_SYS"
