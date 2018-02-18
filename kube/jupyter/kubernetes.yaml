@@ -1,0 +1,81 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: jupyter-notebook
+  labels:
+    app: jupyter-notebook
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: jupyter-notebook
+    spec:
+      containers:
+      - name: jupyter-notebook
+        image: jasongwartz/jupyter-notebook-docker:armhf
+        imagePullPolicy: Always
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8888
+        volumeMounts:
+        - name: notebooks
+          mountPath: /notebooks
+      volumes:
+      - name: notebooks
+        persistentVolumeClaim:
+          claimName: jupyter-notebook-nfs
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: jupyter-notebook-nfs
+spec:
+  capacity:
+    storage: 50Mi
+  accessModes:
+    - ReadWriteMany
+  nfs:
+    server: 10.0.1.5
+    path: "/volume1/kubernetes-nfs/jupyter"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: jupyter-notebook-nfs
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: ""
+  resources:
+    requests:
+      storage: 50Mi
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: jupyter-notebook
+spec:
+  type: NodePort
+  selector:
+    app: jupyter-notebook
+  ports:
+    - port: 80
+      targetPort: 8888
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: jupyter-notebook
+  annotations:
+    kubernetes.io/ingress.class: "traefik"
+spec:
+  rules:
+  - host: jupyter.gwartz.me
+    http:
+      paths:
+      - backend:
+          serviceName: jupyter-notebook
+          servicePort: 80
