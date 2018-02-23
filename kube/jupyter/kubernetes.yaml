@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
       - name: jupyter-notebook
-        image: jasongwartz/jupyter-notebook-docker:armhf
+        image: jasongwartz/jupyter-notebook-docker:armhf-with-packages
         imagePullPolicy: Always
         readinessProbe:
           httpGet:
