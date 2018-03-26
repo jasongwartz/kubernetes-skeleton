@@ -25,33 +25,19 @@ spec:
       volumes:
       - name: notebooks
         persistentVolumeClaim:
-          claimName: jupyter-notebook-nfs
-
----
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: jupyter-notebook-nfs
-spec:
-  capacity:
-    storage: 50Mi
-  accessModes:
-    - ReadWriteMany
-  nfs:
-    server: 10.0.1.5
-    path: "/volume1/kubernetes-nfs/jupyter"
+          claimName: jupyter-notebook-gke
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: jupyter-notebook-nfs
+  name: jupyter-notebook-gke
 spec:
   accessModes:
-    - ReadWriteMany
-  storageClassName: ""
+    - ReadWriteOnce
   resources:
     requests:
-      storage: 50Mi
+      storage: 1Gi
+
 ---
 kind: Service
 apiVersion: v1
